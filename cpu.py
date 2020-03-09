@@ -7,215 +7,212 @@ pc = pyrtl.Register(bitwidth=32, name='pc')
 branch_step = pyrtl.WireVector(bitwidth=32, name='branch_step')
 pc.next <<= pc + 1 + branch_step
 
-if __name__ == '__main__':
+pc.next
+instr = pyrtl.WireVector(bitwidth=32, name='instr')
+instr <<= i_mem[pc]
 
-    pc.next
-    
-    instr = pyrtl.WireVector(bitwidth=32, name='instr')
-    instr <<= i_mem[pc]
-    
-    rs = pyrtl.WireVector(bitwidth=5, name='rs')
-    rt = pyrtl.WireVector(bitwidth=5, name='rt')
-    rd = pyrtl.WireVector(bitwidth=5, name='rd')
-    func = pyrtl.WireVector(bitwidth=6, name='func')
-    op = pyrtl.WireVector(bitwidth=6, name='op')
-    immed = pyrtl.WireVector(bitwidth=16, name='immed')
+rs = pyrtl.WireVector(bitwidth=5, name='rs')
+rt = pyrtl.WireVector(bitwidth=5, name='rt')
+rd = pyrtl.WireVector(bitwidth=5, name='rd')
+func = pyrtl.WireVector(bitwidth=6, name='func')
+op = pyrtl.WireVector(bitwidth=6, name='op')
+immed = pyrtl.WireVector(bitwidth=16, name='immed')
 
 
-    #ALU input data
-    data0 = pyrtl.WireVector(bitwidth=32, name='data0')
-    data1 = pyrtl.WireVector(bitwidth=32, name='data1')
+#ALU input data
+data0 = pyrtl.WireVector(bitwidth=32, name='data0')
+data1 = pyrtl.WireVector(bitwidth=32, name='data1')
 
-    #ALU output data
-    alu_out = pyrtl.WireVector(bitwidth=32, name='alu_out')
+#ALU output data
+alu_out = pyrtl.WireVector(bitwidth=32, name='alu_out')
 
     
-    #instruction decode logic
+#instruction decode logic
 
-    rs <<= instr[21:26]
-    rt <<= instr[16:21]
-    rd <<= instr[11:16]
-    func <<= instr[0:6]
-    op <<= instr[26:32]
-    immed <<= instr[0:16]
+rs <<= instr[21:26]
+rt <<= instr[16:21]
+rd <<= instr[11:16]
+func <<= instr[0:6]
+op <<= instr[26:32]
+immed <<= instr[0:16]
     
-    r_reg0 = pyrtl.WireVector(bitwidth=5, name='r_reg0')
-    r_reg1 = pyrtl.WireVector(bitwidth=5, name='r_reg1')
-    w_data = pyrtl.WireVector(bitwidth=16, name='w_data')
-    w_reg = pyrtl.WireVector(bitwidth=5, name='w_reg')
+r_reg0 = pyrtl.WireVector(bitwidth=5, name='r_reg0')
+r_reg1 = pyrtl.WireVector(bitwidth=5, name='r_reg1')
+w_data = pyrtl.WireVector(bitwidth=16, name='w_data')
+w_reg = pyrtl.WireVector(bitwidth=5, name='w_reg')
 
-    reg_dst = pyrtl.WireVector(bitwidth=1, name='reg_dst')
-    branch = pyrtl.WireVector(bitwidth=1, name='branch')
-    regwrite = pyrtl.WireVector(bitwidth=1, name='regwrite')
-    alu_src = pyrtl.WireVector(bitwidth=2, name='alu_src')
-    mem_write = pyrtl.WireVector(bitwidth=1, name='mem_write')
-    mem_to_reg = pyrtl.WireVector(bitwidth=1, name='mem_to_reg')
-    alu_op = pyrtl.WireVector(bitwidth=3, name='alu_op')
+reg_dst = pyrtl.WireVector(bitwidth=1, name='reg_dst')
+branch = pyrtl.WireVector(bitwidth=1, name='branch')
+regwrite = pyrtl.WireVector(bitwidth=1, name='regwrite')
+alu_src = pyrtl.WireVector(bitwidth=2, name='alu_src')
+mem_write = pyrtl.WireVector(bitwidth=1, name='mem_write')
+mem_to_reg = pyrtl.WireVector(bitwidth=1, name='mem_to_reg')
+alu_op = pyrtl.WireVector(bitwidth=3, name='alu_op')
 
 
 
-    #Control logic
-    with pyrtl.conditional_assignment:
-        #R Type
-        with op==int(0x00):
-            #ADD
-            with func==int(0x20):
-                reg_dst |= 1
-                branch |= 0
-                regwrite |= 1
-                alu_src |= 0
-                mem_write |= 0
-                mem_to_reg |= 0
-                alu_op |= 0
-            #AND
-            with func==int(0x24):
-                reg_dst |= 1
-                branch |= 0
-                regwrite |= 1
-                alu_src |= 0
-                mem_write |= 0
-                mem_to_reg |= 0
-                alu_op |= 1
-            #SLT
-            with func==int(0x2a):
-                reg_dst |= 1
-                branch |= 0
-                regwrite |= 1
-                alu_src |= 0
-                mem_write |= 0
-                mem_to_reg |= 0
-                alu_op |= 4
-        #ADDI
-        with op==int(0x8):
-            reg_dst |= 0
-            branch |= 0
-            regwrite |= 1
-            alu_src |= 1
-            mem_write |= 0
-            mem_to_reg |= 0
-            alu_op |= 0
-        #LUI
-        with op==int(0xf):
-            reg_dst |= 0
-            branch |= 0
-            regwrite |= 1
-            alu_src |= 1
-            mem_write |= 0
-            mem_to_reg |= 0
-            alu_op |= 2
-        #ORI
-        with op==int(0xd):
-            reg_dst |= 0
-            branch |= 0
-            regwrite |= 1
-            alu_src |= 2
-            mem_write |= 0
-            mem_to_reg |= 0
-            alu_op |= 3
-        #LW
-        with op==int(0x23):
-            reg_dst |= 0
-            branch |= 0
-            regwrite |= 1
-            alu_src |= 1
-            mem_write |= 0
-            mem_to_reg |= 1
-            alu_op |= 0
-        #SW
-        with op==int(0x2b):
+#Control logic
+with pyrtl.conditional_assignment:
+    #R Type
+    with op==int(0x00):
+        #ADD
+        with func==int(0x20):
             reg_dst |= 1
             branch |= 0
-            regwrite |= 0
-            alu_src |= 1
-            mem_write |= 1
-            mem_to_reg |= 0
-            alu_op |= 0
-        #BEQ
-        with op==int(0x4):
-            reg_dst |= 1
-            branch |= 1
-            regwrite |= 0
+            regwrite |= 1
             alu_src |= 0
             mem_write |= 0
             mem_to_reg |= 0
-            alu_op |= 5
+            alu_op |= 0
+        #AND
+        with func==int(0x24):
+            reg_dst |= 1
+            branch |= 0
+            regwrite |= 1
+            alu_src |= 0
+            mem_write |= 0
+            mem_to_reg |= 0
+            alu_op |= 1
+        #SLT
+        with func==int(0x2a):
+            reg_dst |= 1
+            branch |= 0
+            regwrite |= 1
+            alu_src |= 0
+            mem_write |= 0
+            mem_to_reg |= 0
+            alu_op |= 4
+    #ADDI
+    with op==int(0x8):
+        reg_dst |= 0
+        branch |= 0
+        regwrite |= 1
+        alu_src |= 1
+        mem_write |= 0
+        mem_to_reg |= 0
+        alu_op |= 0
+    #LUI
+    with op==int(0xf):
+        reg_dst |= 0
+        branch |= 0
+        regwrite |= 1
+        alu_src |= 1
+        mem_write |= 0
+        mem_to_reg |= 0
+        alu_op |= 2
+    #ORI
+    with op==int(0xd):
+        reg_dst |= 0
+        branch |= 0
+        regwrite |= 1
+        alu_src |= 2
+        mem_write |= 0
+        mem_to_reg |= 0
+        alu_op |= 3
+    #LW
+    with op==int(0x23):
+        reg_dst |= 0
+        branch |= 0
+        regwrite |= 1
+        alu_src |= 1
+        mem_write |= 0
+        mem_to_reg |= 1
+        alu_op |= 0
+    #SW
+    with op==int(0x2b):
+        reg_dst |= 1
+        branch |= 0
+        regwrite |= 0
+        alu_src |= 1
+        mem_write |= 1
+        mem_to_reg |= 0
+        alu_op |= 0
+    #BEQ
+    with op==int(0x4):
+        reg_dst |= 1
+        branch |= 1
+        regwrite |= 0
+        alu_src |= 0
+        mem_write |= 0
+        mem_to_reg |= 0
+        alu_op |= 5
 
 
-    r_reg0 <<= rs
-    with pyrtl.conditional_assignment:
-        with reg_dst==int(0x1):
-            r_reg1 |= rt
-            w_reg |= rd
-        with reg_dst==int(0x0):
-            r_reg1 |= rd
-            w_reg |= rt
+r_reg0 <<= rs
+with pyrtl.conditional_assignment:
+    with reg_dst==int(0x1):
+        r_reg1 |= rt
+        w_reg |= rd
+    with reg_dst==int(0x0):
+        r_reg1 |= rd
+        w_reg |= rt
 
 
             
-    #ALU INPUT LOGIC
-    sign_extended = pyrtl.WireVector(bitwidth=32, name='sign_extended')
+#ALU INPUT LOGIC
+sign_extended = pyrtl.WireVector(bitwidth=32, name='sign_extended')
 
-    zero_msb = 0x0000
-    one_msb = 0xffff
-    zero_extended = pyrtl.concat(zero_msb, immed)
-    one_extended = pyrtl.concat(one_msb, immed)
+zero_msb = 0x0000
+one_msb = 0xffff
+zero_extended = pyrtl.concat(zero_msb, immed)
+one_extended = pyrtl.concat(one_msb, immed)
 
-    with pyrtl.conditional_assignment:
-        with immed[-1]==int(0x1):
-            sign_extended |= one_extended
-        with immed[-1]==int(0x0):
-            sign_extended |= zero_extended
+with pyrtl.conditional_assignment:
+    with immed[-1]==int(0x1):
+        sign_extended |= one_extended
+    with immed[-1]==int(0x0):
+        sign_extended |= zero_extended
             
-    data0 |= rf[r_reg0]
-    with pyrtl.conditional_assignment:
-        with alu_src==int(0x0):
-            data1 |= rf[r_reg1]
-        with alu_src==int(0x1):
-            data1 |= sign_extended
-        with alu_src==int(0x2):
-            data1 |= zero_extended
+data0 |= rf[r_reg0]
+with pyrtl.conditional_assignment:
+    with alu_src==int(0x0):
+        data1 |= rf[r_reg1]
+    with alu_src==int(0x1):
+        data1 |= sign_extended
+    with alu_src==int(0x2):
+        data1 |= zero_extended
 
 
 
-    eq_check = pyrtl.WireVector(bitwidth=1, name='eq_check')
+eq_check = pyrtl.WireVector(bitwidth=1, name='eq_check')
             
-    #ALU LOGIC
-    with pyrtl.conditional_assignment:
-        with alu_op==int(0x0):
-            alu_out |= data0 + data1
-        with alu_op==int(0x1):
-            alu_out |= data0 & data1
-        with alu_op==int(0x2):
-            alu_out |= pyrtl.concat(data0[-16:], zero_msb)
-        with alu_op==int(0x3):
-            alu_out |= data0 | data1
-        with alu_op==int(0x4):
-            alu_out |= data0 < data1
-        with alu_op==int(0x5):
-            eq_check |= data0 == data1
-            with eq_check==int(0x1):
-                alu_out |= sign_extended
-                branch_step |= alu_out
-        with alu_op != int(0x5):
-            branch_step |= 0x0
+#ALU LOGIC
+with pyrtl.conditional_assignment:
+    with alu_op==int(0x0):
+        alu_out |= data0 + data1
+    with alu_op==int(0x1):
+        alu_out |= data0 & data1
+    with alu_op==int(0x2):
+        alu_out |= pyrtl.concat(data0[-16:], zero_msb)
+    with alu_op==int(0x3):
+        alu_out |= data0 | data1
+    with alu_op==int(0x4):
+        alu_out |= data0 < data1
+    with alu_op==int(0x5):
+        eq_check |= data0 == data1
+        with eq_check==int(0x1):
+            alu_out |= sign_extended
+            branch_step |= alu_out
+    with alu_op != int(0x5):
+        branch_step |= 0x0
 
 
-    #Mem read
-    with pyrtl.conditional_assignment:
-        with mem_to_reg==int(0x1):
-            w_data |=  d_mem[alu_out]
-        with mem_to_reg==int(0x0):
-            w_data |= alu_out
+#Mem read
+with pyrtl.conditional_assignment:
+    with mem_to_reg==int(0x1):
+        w_data |=  d_mem[alu_out]
+    with mem_to_reg==int(0x0):
+        w_data |= alu_out
             
-    #Mem write
-    with pyrtl.conditional_assignment:
-        with mem_write==int(0x1):
-            d_mem[alu_out] |= data1
+#Mem write
+with pyrtl.conditional_assignment:
+    with mem_write==int(0x1):
+        d_mem[alu_out] |= data1
             
-    #reg write
-    with pyrtl.conditional_assignment:
-        with regwrite==int(0x1):
-            rf[w_reg] |= w_data
+#reg write
+with pyrtl.conditional_assignment:
+    with regwrite==int(0x1):
+        rf[w_reg] |= w_data
 
 
     
@@ -265,8 +262,11 @@ if __name__ == '__main__':
         - Test only a few cycles at a time. This way, you don't have a huge
           500 cycle trace to go through!
 
+
     """
 
+
+if __name__ == '__main__':
     # Start a simulation trace
     sim_trace = pyrtl.SimulationTrace()
 
