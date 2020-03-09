@@ -7,7 +7,7 @@ pc = pyrtl.Register(bitwidth=32, name='pc')
 branch_step = pyrtl.WireVector(bitwidth=32, name='branch_step')
 pc.next <<= pc + 1 + branch_step
 
-pc.next
+#pc.next
 instr = pyrtl.WireVector(bitwidth=32, name='instr')
 instr <<= i_mem[pc]
 
